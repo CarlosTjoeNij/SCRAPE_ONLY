@@ -8,13 +8,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import streamlit as st  # Voor secrets
 
 # Haal credentials op uit .streamlit/secrets.toml
-STRIIVE_USER = st.secrets["striive"]["username"]
-STRIIVE_PASS = st.secrets["striive"]["password"]
-FLEX_USER = st.secrets["flextender"]["username"]
-FLEX_PASS = st.secrets["flextender"]["password"]
+FLEX_USER = "data@breinstein.nl"
+FLEX_PASS = "Databrein123"
 
 # --- HELPER: Chrome driver voor Cloud Run ---
 def get_chrome_driver(timeout=15):
@@ -75,12 +72,10 @@ def scrape_flextender():
     driver.get("https://app.flextender.nl/")
     time.sleep(2)
     try:
-        driver.find_element(By.NAME, "login[username]").send_keys(st.secrets["flextender"]["username"])
-        driver.find_element(By.NAME, "login[password]").send_keys(st.secrets["flextender"]["password"], Keys.ENTER)
-        st.success("✅ Inloggen op Flextender gelukt")
+        driver.find_element(By.NAME, "login[username]").send_keys(FLEX_USER)
+        driver.find_element(By.NAME, "login[password]").send_keys(FLEX_PASS, Keys.ENTER)
     except Exception as e:
-        st.error("❌ Inloggen mislukt op Flextender. Check credentials of browserconfig.")
-        st.stop()
+        print("❌ Inloggen mislukt op Flextender. Check credentials of browserconfig.")
 
     time.sleep(5)
 
@@ -95,7 +90,7 @@ def scrape_flextender():
         paginator.click()
         time.sleep(2)
     except Exception as e:
-        st.warning(f"⚠️ Kon niet terug naar pagina 1: {e}")
+        print(f"⚠️ Kon niet terug naar pagina 1: {e}")
 
     data = []
 
@@ -105,7 +100,7 @@ def scrape_flextender():
             paginator.click()
             time.sleep(2)
         except Exception as e:
-            st.warning(f"⚠️ Kan pagina {page_num} niet openen: {e}")
+            print(f"⚠️ Kan pagina {page_num} niet openen: {e}")
             continue
 
         try:
@@ -113,7 +108,7 @@ def scrape_flextender():
                 By.CSS_SELECTOR, f"div.css-jobsummarywidget.target-jobsearchresults-page-{page_num}"
             )))
         except Exception as e:
-            st.warning(f"❌ Geen vacatures gevonden op pagina {page_num}: {e}")
+            print(f"❌ Geen vacatures gevonden op pagina {page_num}: {e}")
             continue
 
         for div in page_divs:
@@ -156,9 +151,9 @@ def scrape_flextender():
                 data.append(vacature)
 
             except Exception as e:
-                st.warning(f"⚠️ Fout bij vacature verwerken: {e}")
+                print(f"⚠️ Fout bij vacature verwerken: {e}")
                 continue
 
-    st.write(f"Flextender - aantal vacatures gevonden: {len(data)}")
+    print(f"Flextender - aantal vacatures gevonden: {len(data)}")
     driver.quit()
     return pd.DataFrame(data)
