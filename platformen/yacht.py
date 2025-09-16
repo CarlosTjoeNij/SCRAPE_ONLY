@@ -17,7 +17,6 @@ import time
 import numpy as np
 
 import re
-import streamlit as st
 import requests
 
 provincies = [
@@ -64,7 +63,7 @@ def scrape_yacht():
             EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/vacatures')]"))
         )
         driver.execute_script("arguments[0].click();", vacatures_link)
-        st.success("✅ Inloggen op Yacht gelukt")
+        print("✅ Inloggen op Yacht gelukt")
     
         # >>> Nieuw stuk: laad alle vacatures
         while True:
@@ -81,7 +80,7 @@ def scrape_yacht():
     
         # Nu alle vacatures ophalen
         vacatures = driver.find_elements(By.CSS_SELECTOR, "a.search-card--vacancy")
-        st.write(f"Yacht - aantal vacatures gevonden: {len(vacatures)}")
+        print(f"Yacht - aantal vacatures gevonden: {len(vacatures)}")
     
         results = []
         for vac in vacatures:
