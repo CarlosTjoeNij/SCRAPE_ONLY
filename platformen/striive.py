@@ -8,13 +8,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import streamlit as st  # Voor secrets
 
 # Haal credentials op uit .streamlit/secrets.toml
-STRIIVE_USER = st.secrets["striive"]["username"]
-STRIIVE_PASS = st.secrets["striive"]["password"]
-FLEX_USER = st.secrets["flextender"]["username"]
-FLEX_PASS = st.secrets["flextender"]["password"]
+STRIIVE_USER = "data@breinstein.nl"
+STRIIVE_PASS = "Inhuurdesk1234!"
 
 # --- HELPER: Chrome driver voor Cloud Run ---
 def get_chrome_driver(timeout=15):
