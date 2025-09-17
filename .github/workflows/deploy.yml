@@ -1,6 +1,0 @@
-- name: Deploy to Cloud Run Job
-  run: |
-    gcloud run jobs update cv-scraper-job-v2 \
-      --image gcr.io/$PROJECT_ID/cv-scraper-job-v2:latest \
-      --region europe-west4 \
-      --set-env-vars FLEX_USER=${{ secrets.FLEX_USER }},FLEX_PASS=${{ secrets.FLEX_PASS }},STRIIVE_USER=${{ secrets.STRIIVE_USER }},STRIIVE_PASS=${{ secrets.STRIIVE_PASS }},YACHT_USER=${{ secrets.YACHT_USER }},YACHT_PASS=${{ secrets.YACHT_PASS }}
