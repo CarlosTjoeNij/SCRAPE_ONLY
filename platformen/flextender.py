@@ -1,4 +1,5 @@
 import time
+import os
 import pandas as pd
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -9,9 +10,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# Haal credentials op uit .streamlit/secrets.toml
-FLEX_USER = "data@breinstein.nl"
-FLEX_PASS = "Databrein123"
+# Haal credentials op
+FLEX_USER = os.getenv("FLEX_USER")
+FLEX_PASS = os.getenv("FLEX_PASS")
 
 # --- HELPER: Chrome driver voor Cloud Run ---
 def get_chrome_driver(timeout=15):
