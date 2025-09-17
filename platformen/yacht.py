@@ -19,6 +19,9 @@ import numpy as np
 import re
 import requests
 
+YACHT_USER = os.getenv("YACHT_USER")
+YACHT_PASS = os.getenv("YACHT_PASS")
+
 provincies = [
     "Groningen",
     "Friesland",
@@ -55,8 +58,8 @@ def scrape_yacht():
         time.sleep(2)
     
         # Inloggen
-        driver.find_element(By.ID, "input-username").send_keys("informatiemanagement@breinstein.nl")
-        driver.find_element(By.ID, "input-password").send_keys("Breinstein123!")
+        driver.find_element(By.ID, "input-username").send_keys(YACHT_USER)
+        driver.find_element(By.ID, "input-password").send_keys(YACHT_PASS)
         driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
     
         vacatures_link = wait.until(
