@@ -21,7 +21,7 @@ def scrape_all_jobs():
 
     # Striive
     try:
-        print("➡️ Start scrape: Striive")
+        print("➡️ Start scrape: Striive -")
         df_striive = scrape_striive()
         dfs.append(df_striive)
         print(f"✅ Striive done, {len(df_striive)} rows")
