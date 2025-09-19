@@ -44,6 +44,7 @@ def get_chrome_driver(timeout=15):
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920x1080")
+    chrome_options.add_argument("--remote-debugging-port=9222")  # voorkomt crashes
 
     driver = webdriver.Chrome(options=chrome_options)  # Selenium Manager regelt driver
     driver.implicitly_wait(timeout)
