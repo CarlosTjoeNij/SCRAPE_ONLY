@@ -29,23 +29,23 @@ def scrape_all_jobs():
     except Exception as e:
         print(f"❌ Fout tijdens scraping Striive: {e}")
 
-    # # Flextender
-    # try:
-    #     print("➡️ Start scrape: Flextender")
-    #     df_flex = scrape_flextender()
-    #     dfs.append(df_flex)
-    #     print(f"✅ Flextender done, {len(df_flex)} rows")
-    # except Exception as e:
-    #     print(f"❌ Fout tijdens scraping Flextender: {e}")
+    # Flextender
+    try:
+        print("➡️ Start scrape: Flextender")
+        df_flex = scrape_flextender()
+        dfs.append(df_flex)
+        print(f"✅ Flextender done, {len(df_flex)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping Flextender: {e}")
 
-    # # Yacht
-    # try:
-    #     print("➡️ Start scrape: Yacht")
-    #     df_yacht = scrape_yacht()
-    #     dfs.append(df_yacht)
-    #     print(f"✅ Yacht done, {len(df_yacht)} rows")
-    # except Exception as e:
-    #     print(f"❌ Fout tijdens scraping Yacht: {e}")
+    # Yacht
+    try:
+        print("➡️ Start scrape: Yacht")
+        df_yacht = scrape_yacht()
+        dfs.append(df_yacht)
+        print(f"✅ Yacht done, {len(df_yacht)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping Yacht: {e}")
 
     # Circle8
     try:
