@@ -13,6 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from platformen.striive import scrape_striive
 from platformen.flextender import scrape_flextender
 from platformen.yacht import scrape_yacht
+from platformen.circle8 import scrape_circle8
 
 # --- COMBINED SCRAPE ---
 def scrape_all_jobs():
@@ -46,6 +47,15 @@ def scrape_all_jobs():
     except Exception as e:
         print(f"❌ Fout tijdens scraping Yacht: {e}")
 
+    # Circle8
+    try:
+        print("➡️ Start scrape: Circle8")
+        df_circle8 = scrape_circle8()
+        dfs.append(df_circle8)
+        print(f"✅ Circle8 done, {len(df_circle8)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping Circle8: {e}")
+
     if dfs:
         df_combined = pd.concat(dfs, ignore_index=True)
     else:
@@ -56,7 +66,3 @@ def scrape_all_jobs():
     return df_combined
 
 
-    df_combined = pd.concat([df_striive, df_flex, df_yacht], ignore_index=True)
-    duration = time.time() - start_time
-    print(f"✅ Scraping voltooid in {duration/60:.1f} minuten")
-    return df_combined
