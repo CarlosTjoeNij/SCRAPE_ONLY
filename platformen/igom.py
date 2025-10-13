@@ -10,12 +10,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 
-def get_chrome_driver(timeout=10):
+def get_chrome_driver(timeout=15):
     chrome_options = Options()
-    chrome_options.add_argument("--headless=new")  # moderne headless mode
+    chrome_options.add_argument("--headless")  # of --headless=new afhankelijk van je Chrome versie
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--disable-software-rasterizer")
+    chrome_options.add_argument("--disable-features=VizDisplayCompositor")
     chrome_options.add_argument("--window-size=1920,1080")
-    
+    chrome_options.add_argument("--remote-debugging-port=9222")  # voorkomt crashes
+
     driver = webdriver.Chrome(options=chrome_options)
     driver.implicitly_wait(timeout)
     return driver
