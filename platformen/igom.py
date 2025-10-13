@@ -41,7 +41,7 @@ def scrape_igom(with_description=True):
     page = 1
 
     while True:
-        print(f"[Pagina {page}] Scroll en laad vacatures...")
+        #print(f"[Pagina {page}] Scroll en laad vacatures...")
 
         # --- Scroll tot alles geladen is ---
         last_height = driver.execute_script("return document.body.scrollHeight")
@@ -58,7 +58,7 @@ def scrape_igom(with_description=True):
 
         vacatures = driver.find_elements(By.TAG_NAME, "app-vacature-item")
         total = len(vacatures)
-        print(f"{total} vacatures op deze pagina geladen...")
+        #print(f"{total} vacatures op deze pagina geladen...")
 
         for i in range(total):
             vacatures = driver.find_elements(By.TAG_NAME, "app-vacature-item")
@@ -125,7 +125,7 @@ def scrape_igom(with_description=True):
             
             # Controleer of button echt disabled is via aria-disabled
             if next_button.get_attribute("aria-disabled") == "true":
-                print("🚫 Einde bereikt: geen volgende pagina.")
+                #print("🚫 Einde bereikt: geen volgende pagina.")
                 break
 
             driver.execute_script("arguments[0].scrollIntoView(true);", next_button)
