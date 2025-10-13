@@ -1,5 +1,6 @@
 selenium
 webdriver-manager
+undetected-chromedriver
 chromedriver-autoinstaller
 PyMuPDF==1.23.8
 beautifulsoup4
