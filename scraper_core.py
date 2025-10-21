@@ -17,6 +17,7 @@ from platformen.circle8 import scrape_circle8
 from platformen.igom import scrape_igom
 from platformen.werkenvoornederland import scrape_werkenvoornederland
 from platformen.werkeninnoordoostbrabant import scrape_werkeninnoordoostbrabant
+from platformen.werkeninzuidoostbrabant import scrape_werkeninzuidoostbrabant
 
 # --- COMBINED SCRAPE ---
 def scrape_all_jobs():
@@ -84,6 +85,16 @@ def scrape_all_jobs():
         print(f"✅ werkeninnoordoostbrabant done, {len(df_werkeninnoordoostbrabant)} rows")
     except Exception as e:
         print(f"❌ Fout tijdens scraping werkeninnoordoostbrabant: {e}")
+
+    # werkeninzuidoostbrabant
+    try:
+        print("➡️ Start scrape: werkeninzuidoostbrabant")
+        df_werkeninzuidoostbrabant = scrape_werkeninzuidoostbrabant()
+        dfs.append(df_werkeninzuidoostbrabant)
+        print(f"✅ werkeninzuidoostbrabant done, {len(df_werkeninzuidoostbrabant)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping werkeninzuidoostbrabant: {e}")
+
 
     if dfs:
         df_combined = pd.concat(dfs, ignore_index=True)
