@@ -78,12 +78,12 @@ def scrape_all_jobs():
         print(f"❌ Fout tijdens scraping werkenvoornederland: {e}")
 
     try:
-        print("➡️ Start scrape: werkeninnoordoostbrabant.nl")
-        df_werkeninnoordoostbrabant.nl = scrape_werkeninnoordoostbrabant.nl()
-        dfs.append(df_werkeninnoordoostbrabant.nl)
-        print(f"✅ werkeninnoordoostbrabant.nl done, {len(df_werkeninnoordoostbrabant.nl)} rows")
+        print("➡️ Start scrape: werkeninnoordoostbrabant")
+        df_werkeninnoordoostbrabant = scrape_werkeninnoordoostbrabant()
+        dfs.append(df_werkeninnoordoostbrabant)
+        print(f"✅ werkeninnoordoostbrabant done, {len(df_werkeninnoordoostbrabant)} rows")
     except Exception as e:
-        print(f"❌ Fout tijdens scraping werkeninnoordoostbrabant.nl: {e}")
+        print(f"❌ Fout tijdens scraping werkeninnoordoostbrabant: {e}")
 
     if dfs:
         df_combined = pd.concat(dfs, ignore_index=True)
