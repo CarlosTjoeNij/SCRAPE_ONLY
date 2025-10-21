@@ -26,8 +26,6 @@ def get_chrome_driver(timeout=15):
     return driver
 
 def scrape_werkenvoornederland(with_description=True, max_scrolls=30):
-    print("🔍 Start scraping van werkenvoornederland.nl...")
-
     def fetch_vacature_description_safe(link, title, max_retries=3):
         for attempt in range(max_retries):
             try:
@@ -80,7 +78,6 @@ def scrape_werkenvoornederland(with_description=True, max_scrolls=30):
 
     driver = start_driver()
     vacatures = scroll_page(driver)
-    print(f"📄 Scrollen voltooid — {len(vacatures)} vacatures geladen.\n")
 
     data = []
     seen_links = set()
@@ -98,7 +95,6 @@ def scrape_werkenvoornederland(with_description=True, max_scrolls=30):
                 continue
             seen_links.add(link)
 
-            # ✅ Alleen dit stuk is aangepast
             try:
                 regio = vac.find_element(
                     By.CSS_SELECTOR,
