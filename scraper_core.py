@@ -18,6 +18,7 @@ from platformen.igom import scrape_igom
 from platformen.werkenvoornederland import scrape_werkenvoornederland
 from platformen.werkeninnoordoostbrabant import scrape_werkeninnoordoostbrabant
 from platformen.werkeninzuidoostbrabant import scrape_werkeninzuidoostbrabant
+from platformen.gemeentebanen import scrape_gemeentebanen
 
 # --- COMBINED SCRAPE ---
 def scrape_all_jobs():
@@ -95,6 +96,14 @@ def scrape_all_jobs():
     except Exception as e:
         print(f"❌ Fout tijdens scraping werkeninzuidoostbrabant: {e}")
 
+    # gemeentebanen
+    try:
+        print("➡️ Start scrape: Gemeentebanen")
+        df_gemeentebanen = scrape_gemeentebanen()
+        dfs.append(df_gemeentebanen)
+        print(f"✅ Gemeentebanen done, {len(df_gemeentebanen)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping Gemeentebanen: {e}")
 
     if dfs:
         df_combined = pd.concat(dfs, ignore_index=True)
