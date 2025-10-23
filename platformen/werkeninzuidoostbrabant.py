@@ -41,9 +41,9 @@ def scrape_werkeninzuidoostbrabant(with_description=True):
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, "app-vacature-item"))
             )
             vacatures = driver.find_elements(By.CSS_SELECTOR, "app-vacature-item")
-            print(f"📄 Pagina {page}: {len(vacatures)} vacatures gevonden.\n")
+            #print(f"📄 Pagina {page}: {len(vacatures)} vacatures gevonden.\n")
         except TimeoutException:
-            print(f"⚠️ Geen vacatures gevonden op pagina {page}.")
+            #print(f"⚠️ Geen vacatures gevonden op pagina {page}.")
             break
 
         for idx in range(len(vacatures)):
@@ -84,7 +84,7 @@ def scrape_werkeninzuidoostbrabant(with_description=True):
                     "Beschrijving": beschrijving,
                     "Bron": "Werkeninzuidoostbrabant"
                 })
-                print(f"[Pagina {page} - Vacature {idx+1}/{len(vacatures)}] ✅ {titel}")
+                #print(f"[Pagina {page} - Vacature {idx+1}/{len(vacatures)}] ✅ {titel}")
 
                 # Terug naar overzicht
                 driver.back()
@@ -105,7 +105,7 @@ def scrape_werkeninzuidoostbrabant(with_description=True):
             next_btn = driver.find_element(By.CSS_SELECTOR, "button.mat-mdc-paginator-navigation-next")
             # Controleer aria-disabled attribuut in plaats van alleen class
             if next_btn.get_attribute("aria-disabled") == "true":
-                print(f"✅ Laatste pagina {page} bereikt.")
+                #print(f"✅ Laatste pagina {page} bereikt.")
                 break
             # Scroll en klik
             driver.execute_script("arguments[0].scrollIntoView(true);", next_btn)
@@ -113,7 +113,7 @@ def scrape_werkeninzuidoostbrabant(with_description=True):
             page += 1
             time.sleep(5)  # wacht tot de nieuwe pagina geladen is
         except Exception as e:
-            print(f"⚠️ Kan volgende pagina niet vinden of klikken: {e}")
+            #print(f"⚠️ Kan volgende pagina niet vinden of klikken: {e}")
             break
 
     driver.quit()
