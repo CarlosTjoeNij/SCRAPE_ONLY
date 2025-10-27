@@ -139,5 +139,5 @@ def scrape_werkenvoornederland(with_description=True, max_scrolls=30):
     ))
     df['Regio'] = df['Regio'].str.lower().map(plaats_to_provincie).fillna(df['Regio'])
     
-    print(f"\n📄 Totaal {len(df)} vacatures succesvol opgehaald.")
+    #print(f"\n📄 Totaal {len(df)} vacatures succesvol opgehaald.")
     return df
