@@ -43,7 +43,7 @@ def scrape_gemeentebanen(with_description=True, woonplaatsen_csv="woonplaatsen.c
             EC.presence_of_element_located((By.ID, "jr-cookie-modal"))
         )
         driver.execute_script("document.getElementById('jr-cookie-modal').style.display='none';")
-        print("✅ Cookie-banner verborgen.")
+        #print("✅ Cookie-banner verborgen.")
     except TimeoutException:
         print("ℹ️ Geen cookie-banner gevonden.")
 
