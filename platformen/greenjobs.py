@@ -36,11 +36,11 @@ def scrape_greenjobs(with_description=True, woonplaatsen_csv="woonplaatsen.csv",
     visited_pages = set()
 
     while True:
-        print(f"📄 Scrapen van pagina {page}...")
+        #print(f"📄 Scrapen van pagina {page}...")
 
         # Stop bij max_pages
         if page > max_pages:
-            print(f"✅ Maximaal aantal pagina’s ({max_pages}) bereikt, stoppen.")
+            #print(f"✅ Maximaal aantal pagina’s ({max_pages}) bereikt, stoppen.")
             break
 
         try:
@@ -48,12 +48,12 @@ def scrape_greenjobs(with_description=True, woonplaatsen_csv="woonplaatsen.csv",
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".wrapper__job-card"))
             )
         except TimeoutException:
-            print(f"❌ Geen vacatures gevonden op pagina {page}.")
+            #print(f"❌ Geen vacatures gevonden op pagina {page}.")
             break
 
         current_url = driver.current_url
         if current_url in visited_pages:
-            print("⚠️ Pagina al bezocht, stoppen.")
+            #print("⚠️ Pagina al bezocht, stoppen.")
             break
         visited_pages.add(current_url)
 
@@ -113,7 +113,7 @@ def scrape_greenjobs(with_description=True, woonplaatsen_csv="woonplaatsen.csv",
             href = next_button.get_attribute("href")
 
             if not href or "disabled" in next_button.get_attribute("class"):
-                print("✅ Geen volgende pagina meer, stoppen.")
+                #print("✅ Geen volgende pagina meer, stoppen.")
                 break
 
             driver.get(href)
@@ -121,7 +121,7 @@ def scrape_greenjobs(with_description=True, woonplaatsen_csv="woonplaatsen.csv",
             time.sleep(2)
 
         except NoSuchElementException:
-            print("✅ Geen volgende knop gevonden, stoppen.")
+            #print("✅ Geen volgende knop gevonden, stoppen.")
             break
 
     driver.quit()
@@ -146,8 +146,8 @@ def scrape_greenjobs(with_description=True, woonplaatsen_csv="woonplaatsen.csv",
         df["Regio"] = df["Provincie"].fillna("Onbekend")
         df.drop(columns=["Plaats", "Provincie"], inplace=True)
     except Exception as e:
-        print(f"⚠️ Provincie mapping mislukt: {e}")
+        #print(f"⚠️ Provincie mapping mislukt: {e}")
         df["Regio"] = df["Regio"].fillna("Onbekend")
 
-    print(f"✅ {len(df)} vacatures gevonden op {page} pagina’s.")
+    #print(f"✅ {len(df)} vacatures gevonden op {page} pagina’s.")
     return df
