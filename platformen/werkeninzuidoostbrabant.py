@@ -118,5 +118,5 @@ def scrape_werkeninzuidoostbrabant(with_description=True):
 
     driver.quit()
     df = pd.DataFrame(data)
-    print(f"\n📄 Totaal {len(df)} vacatures succesvol opgehaald.")
+    #print(f"\n📄 Totaal {len(df)} vacatures succesvol opgehaald.")
     return df
