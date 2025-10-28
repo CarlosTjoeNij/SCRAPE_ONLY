@@ -22,6 +22,7 @@ from platformen.gemeentebanen import scrape_gemeentebanen
 from platformen.greenjobs import scrape_greenjobs
 from platformen.werkeninnoordhollandnoord import scrape_werkeninnoordhollandnoord
 from platformen.werkeninfriesland import scrape_werkeninfriesland
+from platformen.werkenvoorgroningen import scrape_werkenvoorgroningen
 
 # --- COMBINED SCRAPE ---
 def scrape_all_jobs():
