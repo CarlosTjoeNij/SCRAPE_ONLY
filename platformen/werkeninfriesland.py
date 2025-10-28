@@ -91,5 +91,4 @@ def scrape_werkeninfriesland(with_description=True, categories=True):
     driver.quit()
     df = pd.DataFrame(all_data)
     df.drop_duplicates(subset=["Titel", "Link"], inplace=True)
-    print(f"✅ {len(df)} vacatures gevonden.")
     return df
