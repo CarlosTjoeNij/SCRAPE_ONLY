@@ -49,8 +49,8 @@ def scrape_striive():
             )
         )
         opdrachten_link.click()
-        print("✅ Inloggen op Striive gelukt")
-
+        #print("✅ Inloggen op Striive gelukt")
+        
         scroll_container = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.p-scroller")))
         vacature_links_dict = {}
         repeats = 0
