@@ -155,6 +155,5 @@ def scrape_flextender():
                 print(f"⚠️ Fout bij vacature verwerken: {e}")
                 continue
 
-    print(f"Flextender - aantal vacatures gevonden: {len(data)}")
     driver.quit()
     return pd.DataFrame(data)
