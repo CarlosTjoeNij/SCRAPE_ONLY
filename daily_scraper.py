@@ -21,7 +21,7 @@ def upload_to_gcs(df: pd.DataFrame):
     buffer.seek(0)
 
     blob.upload_from_file(buffer, content_type="application/octet-stream")
-    print(f"✅ Uploaded {len(df)} rows to gs://{BUCKET_NAME}/{filename}")
+    print(f"> Uploaded {len(df)} rows to gs://{BUCKET_NAME}/{filename}")
 
 def main():
     print("Start scraping job...")
