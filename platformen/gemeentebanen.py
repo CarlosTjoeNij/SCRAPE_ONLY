@@ -166,4 +166,5 @@ def scrape_gemeentebanen(with_description=True, woonplaatsen_csv="woonplaatsen.c
         print(f"⚠️ Provincie mapping mislukt: {e}")
         df["Regio"] = df["Regio"].fillna("Onbekend")
 
+    df.drop_duplicates()
     return df
