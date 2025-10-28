@@ -25,6 +25,7 @@ from platformen.werkeninfriesland import scrape_werkeninfriesland
 from platformen.werkenvoorgroningen import scrape_werkenvoorgroningen
 from platformen.vooruitindrenthe import scrape_vooruitindrenthe
 from platformen.werkenaanhetnoorden import scrape_werkenaanhetnoorden
+from platformen.noordnederlandwerkt import scrape_noordnederlandwerkt
 
 
 # --- COMBINED SCRAPE ---
@@ -165,7 +166,15 @@ def scrape_all_jobs():
         print(f"✅ Werkenaanhetnoorden done, {len(df_werkenaanhetnoorden)} rows")
     except Exception as e:
         print(f"❌ Fout tijdens scraping Werkenaanhetnoorden: {e}")
-    
+
+    # noordnederlandwerkt
+    try:
+        print("➡️ Start scrape: Noordnederlandwerkt")
+        df_noordnederlandwerkt = scrape_noordnederlandwerkt()
+        dfs.append(df_noordnederlandwerkt)
+        print(f"✅ Noordnederlandwerkt done, {len(df_noordnederlandwerkt)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping Noordnederlandwerkt: {e}")
 
     if dfs:
         df_combined = pd.concat(dfs, ignore_index=True)
