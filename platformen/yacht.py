@@ -84,7 +84,6 @@ def scrape_yacht():
     
         # Nu alle vacatures ophalen
         vacatures = driver.find_elements(By.CSS_SELECTOR, "a.search-card--vacancy")
-        print(f"Yacht - aantal vacatures gevonden: {len(vacatures)}")
     
         results = []
         for vac in vacatures:
