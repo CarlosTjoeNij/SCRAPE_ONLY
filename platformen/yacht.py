@@ -67,7 +67,7 @@ def scrape_yacht():
             EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/vacatures')]"))
         )
         driver.execute_script("arguments[0].click();", vacatures_link)
-        print("✅ Inloggen op Yacht gelukt")
+        #print("✅ Inloggen op Yacht gelukt")
     
         # >>> Nieuw stuk: laad alle vacatures
         while True:
