@@ -135,6 +135,15 @@ def scrape_all_jobs():
     except Exception as e:
         print(f"❌ Fout tijdens scraping Werkeninfriesland: {e}")    
 
+    # werkenvoorgroningen
+    try:
+        print("➡️ Start scrape: Werkenvoorgroningen")
+        df_werkenvoorgroningen = scrape_werkenvoorgroningen()
+        dfs.append(df_werkenvoorgroningen)
+        print(f"✅ Werkenvoorgroningen done, {len(df_werkenvoorgroningen)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping Werkenvoorgroningen: {e}") 
+
     if dfs:
         df_combined = pd.concat(dfs, ignore_index=True)
     else:
