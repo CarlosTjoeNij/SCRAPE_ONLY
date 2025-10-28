@@ -23,6 +23,8 @@ from platformen.greenjobs import scrape_greenjobs
 from platformen.werkeninnoordhollandnoord import scrape_werkeninnoordhollandnoord
 from platformen.werkeninfriesland import scrape_werkeninfriesland
 from platformen.werkenvoorgroningen import scrape_werkenvoorgroningen
+from platformen.vooruitindrenthe import scrape_vooruitindrenthe
+
 
 # --- COMBINED SCRAPE ---
 def scrape_all_jobs():
@@ -144,6 +146,15 @@ def scrape_all_jobs():
         print(f"✅ Werkenvoorgroningen done, {len(df_werkenvoorgroningen)} rows")
     except Exception as e:
         print(f"❌ Fout tijdens scraping Werkenvoorgroningen: {e}") 
+
+    # vooruitindrenthe
+    try:
+        print("➡️ Start scrape: Vooruitindrenthe")
+        df_vooruitindrenthe = scrape_vooruitindrenthe()
+        dfs.append(df_vooruitindrenthe)
+        print(f"✅ Vooruitindrenthe done, {len(df_vooruitindrenthe)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping Vooruitindrenthe: {e}")
 
     if dfs:
         df_combined = pd.concat(dfs, ignore_index=True)
