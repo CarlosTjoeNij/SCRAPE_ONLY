@@ -99,8 +99,6 @@ def scrape_striive():
             except Exception as e:
                 print(f"⚠️ Fout bij laden detailpagina: {link} - {e}")
                 continue
-
-        print(f"Striive - aantal vacatures gevonden: {len(results)}")
         return pd.DataFrame(results)
 
     except Exception as e:
