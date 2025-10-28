@@ -117,5 +117,5 @@ def scrape_werkeninnoordhollandnoord(with_description=True, max_pages=10):
     driver.quit()
     df = pd.DataFrame(data)
     df.drop_duplicates(subset=["Titel", "Link"], inplace=True)
-    print(f"✅ {len(df)} vacatures gevonden op {page} pagina’s.")
+    #print(f"✅ {len(df)} vacatures gevonden op {page} pagina’s.")
     return df
