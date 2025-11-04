@@ -19,24 +19,6 @@ import numpy as np
 import re
 import requests
 
-YACHT_USER = os.getenv("YACHT_USER")
-YACHT_PASS = os.getenv("YACHT_PASS")
-
-provincies = [
-    "Groningen",
-    "Friesland",
-    "Drenthe",
-    "Overijssel",
-    "Flevoland",
-    "Gelderland",
-    "Utrecht",
-    "Noord-Holland",
-    "Zuid-Holland",
-    "Zeeland",
-    "Noord-Brabant",
-    "Limburg"
-]
-
 def get_chrome_driver(timeout=15):
     chrome_options = Options()
     chrome_options.add_argument("--headless=new")
@@ -51,117 +33,98 @@ def get_chrome_driver(timeout=15):
     return driver
 
 def scrape_yacht():
-    driver = get_chrome_driver()
-    wait = WebDriverWait(driver, 15)
+    base_url = "https://www.yacht.nl"
+    start_url = "https://www.yacht.nl/vacatures?urenperweek=33%20-%2036%20uur&urenperweek=37%20-%2040%2B%20uur&werkervaring=minder%20dan%201%20jaar&werkervaring=1%20-%202%20jaar&werkervaring=2%20-%205%20jaar"
+
+    # === Setup Selenium driver ===
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    driver = webdriver.Chrome(options=options)
+    wait = WebDriverWait(driver, 10)
+
     try:
-        driver.get("https://www.yacht.nl/mijn-yacht/")
-        driver.set_window_size(1920, 1080)
-        time.sleep(2)
-    
-        # Inloggen
-        driver.find_element(By.ID, "input-username").send_keys(YACHT_USER)
-        driver.find_element(By.ID, "input-password").send_keys(YACHT_PASS)
-        driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
-    
-        vacatures_link = wait.until(
-            EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/vacatures')]"))
-        )
-        driver.execute_script("arguments[0].click();", vacatures_link)
-        #print("✅ Inloggen op Yacht gelukt")
-    
-        # >>> Nieuw stuk: laad alle vacatures
+        driver.get(start_url)
+        time.sleep(3)
+
+        # Klik alle 'Laad meer resultaten' knoppen
         while True:
             try:
-                load_more = wait.until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, "button.button__load-more"))
-                )
-                driver.execute_script("arguments[0].scrollIntoView(true);", load_more)
+                load_more = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "button.button__load-more")))
+                driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", load_more)
                 time.sleep(1)
-                load_more.click()
-                time.sleep(2)
+        
+                # klik via JS, stabieler
+                driver.execute_script("arguments[0].click();", load_more)
+                time.sleep(3)
+        
             except TimeoutException:
-                break  # geen knop meer aanwezig
-    
-        # Nu alle vacatures ophalen
-        vacatures = driver.find_elements(By.CSS_SELECTOR, "a.search-card--vacancy")
-    
-        results = []
-        for vac in vacatures:
+                break
+            except Exception as e:
+                print(f"⚠️ Klikprobleem: {e}")
+                break
+
+
+        # HTML parsen met BeautifulSoup
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        cards = soup.select("a.search-card--vacancy")
+
+        vacatures = []
+        for card in cards:
             try:
-                titel = vac.find_element(By.TAG_NAME, "h4").text.strip()
-            except:
-                titel = None
-            
-            try:
-                regio = vac.find_element(
-                    By.CSS_SELECTOR, "ul.vacancy-meta__list li:nth-child(1) span:last-child"
-                ).text.strip()
-            except:
-                regio = None
-    
-            link = vac.get_attribute("href")
-    
-            # Detailpagina openen
-            driver.execute_script("window.open(arguments[0], '_blank');", link)
-            driver.switch_to.window(driver.window_handles[1])
-    
-            try:
-                beschrijving_el = wait.until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "article.rich-text--vacancy"))
-                )
-                beschrijving = beschrijving_el.text.strip()
-            except:
-                beschrijving = None
-    
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
-    
-            results.append({
-                "Titel": titel,
-                "Opdrachtgever": None,
-                "Regio": regio,
-                "Link": link,
-                "Bron": "Yacht",
-                "Beschrijving": beschrijving
-            })
-    
-        df = pd.DataFrame(results)
+                link = base_url + card.get("href")
+                titel = card.select_one("h4").get_text(strip=True) if card.select_one("h4") else ""
+                bedrijf = card.select_one("p.text--grey").get_text(strip=True) if card.select_one("p.text--grey") else ""
 
-        # >>> Data merge stuk
-        plek1 = pd.read_csv('WoonplaatsenCodes.csv', sep=';')
-        plek2 = pd.read_csv('Observations.csv', sep=';')
-        gem = pd.read_csv('gemeentes.csv', sep=';', encoding='latin1')
+                # Regio (plaats)
+                regio_el = card.select_one("li.has-icon span:last-child")
+                regio = regio_el.get_text(strip=True) if regio_el else ""
 
-        plek_merged = pd.merge(
-            plek2,
-            plek1[['Identifier', 'Title']],
-            left_on='Woonplaatsen', 
-            right_on='Identifier',
-            how='left'
-        ).drop(columns=['Identifier'])
+                # Detailpagina ophalen
+                beschrijving = ""
+                try:
+                    detail = requests.get(link)
+                    if detail.status_code == 200:
+                        dsoup = BeautifulSoup(detail.text, "html.parser")
+                        beschrijving_el = dsoup.select_one("article.rich-text--vacancy")
+                        beschrijving = beschrijving_el.get_text(separator="\n", strip=True) if beschrijving_el else ""
+                except Exception as e:
+                    print(f"⚠️ Detailpagina mislukt: {e}")
 
-        provincies_clean = {p.lower().strip(): p for p in provincies}
-        plek_merged['StringValue'] = plek_merged['StringValue'].replace("Fryslân", "Friesland")
-        plek_merged['StringValue_clean'] = plek_merged['StringValue'].str.lower().str.strip()
+                vacatures.append({
+                    "Titel": titel,
+                    "Opdrachtgever": bedrijf,
+                    "Regio": regio,
+                    "Link": link,
+                    "Bron": "Yacht",
+                    "Beschrijving": beschrijving
+                })
 
-        plek_merged_filtered = plek_merged[
-            plek_merged['StringValue_clean'].isin(provincies_clean.keys())
-        ].copy()
-        plek_merged_filtered['Provincie'] = plek_merged_filtered['StringValue_clean'].map(provincies_clean)
+                time.sleep(0.2)
 
-        df['Plaats_clean'] = df['Regio'].str.split(',').str[0].str.strip().str.lower()
-        plek_merged_filtered['Title_clean'] = plek_merged_filtered['Title'].str.strip().str.lower()
+            except Exception as e:
+                print(f"⚠️ Fout bij vacaturekaart: {e}")
 
-        df_alles = df.merge(
-            plek_merged_filtered[['Title_clean', 'Provincie']],
-            how='left',
-            left_on='Plaats_clean',
-            right_on='Title_clean'
-        ).drop(columns=['Title_clean'])
+        df = pd.DataFrame(vacatures)
 
-        df_alles['Provincie'] = df_alles['Provincie'].fillna(df_alles['Regio'])
+        # === Mapping: Plaats → Provincie via woonplaatsen.csv ===
+        woonplaatsen = pd.read_csv("woonplaatsen.csv", sep=",")
+        woonplaatsen["Plaats_clean"] = woonplaatsen["Plaats"].astype(str).str.lower().str.strip()
+        woonplaatsen["Provincie_clean"] = woonplaatsen["Provincie"].astype(str).str.strip()
 
-        return df_alles
+        def get_provincie(regio_text):
+            if not isinstance(regio_text, str):
+                return regio_text
+            regio_text_lower = regio_text.lower()
+            for _, row in woonplaatsen.iterrows():
+                if row["Plaats_clean"] and row["Plaats_clean"] in regio_text_lower:
+                    return row["Provincie_clean"]
+            return regio_text  # geen match → hou regio zelf
+
+        df["Regio"] = df["Regio"].apply(get_provincie)
+
+        return df
 
     finally:
         driver.quit()
