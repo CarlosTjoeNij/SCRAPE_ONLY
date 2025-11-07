@@ -75,11 +75,10 @@ def scrape_flextender():
     try:
         driver.find_element(By.NAME, "login[username]").send_keys(FLEX_USER)
         driver.find_element(By.NAME, "login[password]").send_keys(FLEX_PASS, Keys.ENTER)
-    except Exception as e:
+    except Exception:
         print("❌ Inloggen mislukt op Flextender. Check credentials of browserconfig.")
 
     time.sleep(5)
-
     driver.get("https://app.flextender.nl/supplier/jobs/recommended")
     wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.css-jobsummarywidget")))
     time.sleep(3)
@@ -87,7 +86,9 @@ def scrape_flextender():
     total_pages = get_total_pages(driver, wait)
 
     try:
-        paginator = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "span.target-jobsearchresults-page-1")))
+        paginator = wait.until(EC.element_to_be_clickable(
+            (By.CSS_SELECTOR, "span.target-jobsearchresults-page-1")
+        ))
         paginator.click()
         time.sleep(2)
     except Exception as e:
@@ -97,7 +98,9 @@ def scrape_flextender():
 
     for page_num in range(1, total_pages + 1):
         try:
-            paginator = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, f"span.target-jobsearchresults-page-{page_num}")))
+            paginator = wait.until(EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, f"span.target-jobsearchresults-page-{page_num}")
+            ))
             paginator.click()
             time.sleep(2)
         except Exception as e:
@@ -125,27 +128,51 @@ def scrape_flextender():
                     "pagina": page_num,
                     "Titel": titel,
                     "Opdrachtgever": opdrachtgever,
-                    "Link": link
+                    "Link": link,
+                    "Plaats": "",
+                    "Email": "",
+                    "Beschrijving": ""
                 }
 
+                # Captionvelden uitlezen (voor locatie)
                 caption_fields = card.find_elements(By.CSS_SELECTOR, ".caption-field")
                 for field in caption_fields:
                     try:
                         label = field.find_element(By.CSS_SELECTOR, ".caption").text.strip()
                         value = field.find_element(By.CSS_SELECTOR, ".field").text.strip()
                         vacature[label] = value
+                        if "plaats" in label.lower() or "locatie" in label.lower():
+                            vacature["Plaats"] = value
                     except:
                         continue
 
+                # Detailpagina openen in nieuw tabblad
                 driver.execute_script("window.open('');")
                 driver.switch_to.window(driver.window_handles[1])
                 driver.get(link)
+
                 try:
                     wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.css-formattedjobdescription")))
                     desc_html = driver.find_element(By.CSS_SELECTOR, "div.css-formattedjobdescription").get_attribute("innerHTML")
                     vacature["Beschrijving"] = desc_html
                 except:
                     vacature["Beschrijving"] = "Geen beschrijving gevonden"
+
+                # E-mailadres vinden
+                try:
+                    mail_elem = driver.find_element(By.CSS_SELECTOR, "a[href^='mailto:']")
+                    vacature["Email"] = mail_elem.get_attribute("href").replace("mailto:", "").strip()
+                except:
+                    vacature["Email"] = ""
+
+                # Plaats uit detailpagina fallback
+                if not vacature["Plaats"]:
+                    try:
+                        plaats_el = driver.find_element(By.CSS_SELECTOR, ".css-joblocation")
+                        vacature["Plaats"] = plaats_el.text.strip()
+                    except:
+                        pass
+
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])
 
