@@ -131,7 +131,8 @@ def scrape_flextender():
                     "Link": link,
                     "Plaats": "",
                     "Email": "",
-                    "Beschrijving": ""
+                    "Beschrijving": "",
+                    "Bron": "Flextender"
                 }
 
                 # Captionvelden uitlezen (voor locatie)
