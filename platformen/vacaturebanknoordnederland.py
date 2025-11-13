@@ -42,7 +42,6 @@ def scrape_vacaturebanknoordnederland():
 
     while True:
         url = f"{base_search}&page={page}"
-        print(f"📄 Scraping pagina {page}... ({url})")
 
         r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
         if r.status_code != 200:
