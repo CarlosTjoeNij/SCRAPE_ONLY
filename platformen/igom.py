@@ -25,12 +25,6 @@ def get_chrome_driver(timeout=15):
     driver.implicitly_wait(timeout)
     return driver
 
-woonplaatsen_df = pd.read_csv("woonplaatsen.csv")  # kolommen: 'Gemeente met link naar gemeentelijke website', 'Provincie'
-plaats_to_provincie = dict(zip(
-    woonplaatsen_df['Gemeente met link naar gemeentelijke website'].str.lower(),
-    woonplaatsen_df['Provincie']
-))
-
 def scrape_igom(with_description=True):
     driver = get_chrome_driver()
     driver.get("https://www.igom.nl/vacatures")
@@ -40,10 +34,15 @@ def scrape_igom(with_description=True):
     seen_links = set()
     page = 1
 
-    while True:
-        #print(f"[Pagina {page}] Scroll en laad vacatures...")
+    # --- Mapping woonplaats → provincie ---
+    woonplaatsen_df = pd.read_csv("woonplaatsen.csv")  # kolommen: 'Gemeente met link naar gemeentelijke website', 'Provincie'
+    plaats_to_provincie = dict(zip(
+        woonplaatsen_df['Gemeente met link naar gemeentelijke website'].str.lower(),
+        woonplaatsen_df['Provincie']
+    ))
 
-        # --- Scroll tot alles geladen is ---
+    while True:
+        # Scroll tot alles geladen is
         last_height = driver.execute_script("return document.body.scrollHeight")
         same_count = 0
         while same_count < 3:
@@ -58,30 +57,36 @@ def scrape_igom(with_description=True):
 
         vacatures = driver.find_elements(By.TAG_NAME, "app-vacature-item")
         total = len(vacatures)
-        #print(f"{total} vacatures op deze pagina geladen...")
 
         for i in range(total):
             vacatures = driver.find_elements(By.TAG_NAME, "app-vacature-item")
             vac = vacatures[i]
 
+            # --- Titel ---
             try:
                 title = vac.find_element(By.CSS_SELECTOR, "h3.kaart__titel").text.strip()
             except NoSuchElementException:
                 title = ""
 
+            # --- Opdrachtgever, Plaats & Provincie ---
             try:
-                regio_raw = vac.find_element(By.CSS_SELECTOR, "p.kaart__organisatie").text.strip().replace("Gemeente ", "")
-                regio_key = regio_raw.lower()
-                if "limburg" in regio_key:
+                opdrachtgever_raw = vac.find_element(By.CSS_SELECTOR, "p.kaart__organisatie").text.strip()
+                plaats_raw = opdrachtgever_raw.replace("Gemeente ", "").strip()
+                plaats_key = plaats_raw.lower()
+                if "limburg" in plaats_key:
                     regio = "Limburg"
                 else:
-                    regio = plaats_to_provincie.get(regio_key, "")
+                    regio = plaats_to_provincie.get(plaats_key, "")
             except NoSuchElementException:
+                opdrachtgever_raw = ""
+                plaats_raw = ""
                 regio = ""
 
             link = ""
             desc = ""
+            email = ""
 
+            # --- Detailpagina ---
             try:
                 driver.execute_script("arguments[0].scrollIntoView(true);", vac)
                 vac.click()
@@ -89,6 +94,8 @@ def scrape_igom(with_description=True):
 
                 link = driver.current_url
                 if link in seen_links:
+                    driver.back()
+                    time.sleep(2)
                     continue
                 seen_links.add(link)
 
@@ -97,24 +104,36 @@ def scrape_igom(with_description=True):
                         desc = driver.find_element(By.CSS_SELECTOR, "div.cb-text-container").text.strip()
                     except NoSuchElementException:
                         desc = ""
+
+                # --- Email (optioneel) ---
+                try:
+                    email_el = driver.find_element(By.CSS_SELECTOR, "span.contact-item-email")
+                    email = email_el.text.strip()
+                except NoSuchElementException:
+                    email = ""
+
                 driver.back()
                 time.sleep(2)
+
             except StaleElementReferenceException:
                 continue
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"⚠️ Fout bij detailpagina: {e}")
+                continue
 
             data.append({
                 "Titel": title,
+                "Opdrachtgever": opdrachtgever_raw,
+                "Plaats": plaats_raw,
                 "Regio": regio,
+                "Email": email,
                 "Link": link,
                 "Beschrijving": desc,
                 "Bron": "IGOM"
             })
 
-        # --- Volgende pagina proberen ---
+        # --- Volgende pagina ---
         try:
-            # Verwijder overlay
             try:
                 overlay = driver.find_element(By.CSS_SELECTOR, ".login-section")
                 driver.execute_script("arguments[0].style.display='none';", overlay)
@@ -122,10 +141,7 @@ def scrape_igom(with_description=True):
                 pass
 
             next_button = driver.find_element(By.CSS_SELECTOR, "button.mat-mdc-paginator-navigation-next")
-            
-            # Controleer of button echt disabled is via aria-disabled
             if next_button.get_attribute("aria-disabled") == "true":
-                #print("🚫 Einde bereikt: geen volgende pagina.")
                 break
 
             driver.execute_script("arguments[0].scrollIntoView(true);", next_button)
@@ -133,8 +149,8 @@ def scrape_igom(with_description=True):
             page += 1
             time.sleep(3)
 
-        except:
-            print("🚫 Fout bij volgende pagina, stoppen.")
+        except Exception:
+            print("🚫 Geen volgende pagina meer of fout bij klikken.")
             break
 
     driver.quit()
