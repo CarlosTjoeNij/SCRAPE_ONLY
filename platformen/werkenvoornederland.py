@@ -25,33 +25,28 @@ def get_chrome_driver(timeout=15):
     return driver
 
 def scrape_werkenvoornederland(with_description=True, max_scrolls=30):
-    def fetch_vacature_description_safe(link, title, max_retries=3):
-        for attempt in range(max_retries):
-            try:
-                resp = requests.get(link, timeout=(5, 10))  # <— snellere timeout
-                resp.raise_for_status()
-                soup = BeautifulSoup(resp.text, "html.parser")
-                sections = soup.select("div.width-100")
-    
-                text_parts = []
-                for sec in sections:
-                    heading = sec.select_one("h2")
-                    content = sec.select_one("div.s-article-content")
-                    if heading and content and heading.text.strip() in [
-                        "Dit ga je doen",
-                        "Dit vragen wij",
-                        "Hier kom je te werken",
-                    ]:
-                        text_parts.append(f"### {heading.text.strip()}\n{content.text.strip()}")
-    
-                return "\n\n".join(text_parts)
-    
-            except requests.exceptions.RequestException as e:
-                print(f"⚠️ Beschrijving poging {attempt+1}/{max_retries} mislukt ({title}): {e}")
-                time.sleep(2 ** attempt)
-    
-        print(f"❌ Beschrijving mislukt voor {title}.")
-        return ""
+    def fetch_vacature_description(link, title):
+        """Haalt de beschrijving van de detailpagina (snel via requests)."""
+        try:
+            resp = requests.get(link, timeout=(5, 10))
+            resp.raise_for_status()
+            soup = BeautifulSoup(resp.text, "html.parser")
+
+            sections = soup.select("div.width-100")
+            text_parts = []
+            for sec in sections:
+                heading = sec.select_one("h2")
+                content = sec.select_one("div.s-article-content")
+                if heading and content and heading.text.strip() in [
+                    "Dit ga je doen",
+                    "Dit vragen wij",
+                    "Hier kom je te werken",
+                ]:
+                    text_parts.append(f"### {heading.text.strip()}\n{content.text.strip()}")
+            return "\n\n".join(text_parts)
+        except Exception as e:
+            print(f"⚠️ Beschrijving mislukt ({title}): {e}")
+            return ""
 
     def start_driver():
         driver = get_chrome_driver()
@@ -78,66 +73,84 @@ def scrape_werkenvoornederland(with_description=True, max_scrolls=30):
     driver = start_driver()
     vacatures = scroll_page(driver)
 
+    wait = WebDriverWait(driver, 6)
     data = []
     seen_links = set()
-    idx = 0
 
-    while idx < len(vacatures):
+    for idx, vac in enumerate(vacatures):
         try:
-            vac = vacatures[idx]
             title_el = vac.find_element(By.CSS_SELECTOR, "h2.vacancy__title a")
             title = title_el.text.strip()
             link = title_el.get_attribute("href")
-
-            if not link or link in seen_links:
-                idx += 1
+            if not link.startswith("http"):
+                link = "https://www.werkenvoornederland.nl" + link
+            if link in seen_links:
                 continue
             seen_links.add(link)
 
+            # Plaats
             try:
-                regio = vac.find_element(
-                    By.CSS_SELECTOR,
-                    "li.job-short-info__item-icon span.job-short-info__value-icon"
-                ).text.strip()
+                plaats = vac.find_element(By.CSS_SELECTOR, "li.job-short-info__item-icon span.job-short-info__value-icon").text.strip()
             except NoSuchElementException:
-                regio = ""
+                plaats = ""
 
-            desc = ""
-            if with_description:
-                desc = fetch_vacature_description_safe(link, title)
+            # Opdrachtgever
+            try:
+                opdrachtgever = vac.find_element(By.CSS_SELECTOR, "p.vacancy__employer").text.strip()
+            except NoSuchElementException:
+                opdrachtgever = ""
+
+            # Beschrijving via requests
+            beschrijving = fetch_vacature_description(link, title) if with_description else ""
+
+            # --- Email via Selenium ---
+            email = ""
+            try:
+                # Open vacaturepagina
+                driver.execute_script("window.open(arguments[0]);", link)
+                driver.switch_to.window(driver.window_handles[-1])
+                time.sleep(2)
+
+                # Wachten tot e-mail zichtbaar (max 5 sec)
+                email_el = wait.until(
+                    EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, "span.job-contact-person__email a[href^='mailto:']")
+                    )
+                )
+                email = email_el.text.strip()
+
+            except TimeoutException:
+                email = ""
+            except Exception as e:
+                print(f"⚠️ Geen email gevonden bij {title}: {e}")
+            finally:
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
 
             data.append({
                 "Titel": title,
-                "Regio": regio,  # <-- Locatie komt hier in "Regio"
+                "Plaats": plaats,
+                "Regio": plaats,  # later mappen
+                "Opdrachtgever": opdrachtgever,
+                "Email": email,
                 "Link": link,
-                "Beschrijving": desc,
+                "Beschrijving": beschrijving,
                 "Bron": "Werken voor Nederland"
             })
 
-            #print(f"[{idx+1}/{len(vacatures)}] ✅ {title}")
-            idx += 1
-
-        except (TimeoutError, WebDriverException, InvalidSessionIdException) as e:
-            print(f"⚠️ Selenium-timeout of sessieprobleem ({type(e).__name__}) — herstarten en hervatten bij index {idx}...")
-            try:
-                driver.quit()
-            except:
-                pass
-            time.sleep(5)
-            driver = start_driver()
-            vacatures = scroll_page(driver)
+        except Exception as e:
+            print(f"⚠️ Fout bij vacature {idx+1}: {e}")
             continue
 
     driver.quit()
     df = pd.DataFrame(data)
 
-    
-    woonplaatsen_df = pd.read_csv("woonplaatsen.csv")  #
+    # Mapping Plaats → Provincie
+    woonplaatsen_df = pd.read_csv("woonplaatsen.csv")
     plaats_to_provincie = dict(zip(
         woonplaatsen_df['Plaats'].str.lower().str.strip(),
         woonplaatsen_df['Provincie'].str.strip()
     ))
-    df['Regio'] = df['Regio'].str.lower().map(plaats_to_provincie).fillna(df['Regio'])
-    
-    #print(f"\n📄 Totaal {len(df)} vacatures succesvol opgehaald.")
+
+    df["Regio"] = df["Plaats"].str.lower().map(plaats_to_provincie).fillna(df["Plaats"])
     return df
