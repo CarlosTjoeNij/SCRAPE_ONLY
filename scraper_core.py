@@ -72,32 +72,32 @@ def scrape_all_jobs():
     except Exception as e:
         print(f"❌ Fout tijdens scraping IGOM: {e}")
 
-    # werkenvoornederland
+    # # werkenvoornederland
+    # try:
+    #     print("➡️ Start scrape: werkenvoornederland")
+    #     df_werkenvoornederland = scrape_werkenvoornederland()
+    #     dfs.append(df_werkenvoornederland)
+    #     print(f"✅ werkenvoornederland done, {len(df_werkenvoornederland)} rows")
+    # except Exception as e:
+    #     print(f"❌ Fout tijdens scraping werkenvoornederland: {e}")
+
+    # werkeninnoordoostbrabant
     try:
-        print("➡️ Start scrape: werkenvoornederland")
-        df_werkenvoornederland = scrape_werkenvoornederland()
-        dfs.append(df_werkenvoornederland)
-        print(f"✅ werkenvoornederland done, {len(df_werkenvoornederland)} rows")
+        print("➡️ Start scrape: werkeninnoordoostbrabant")
+        df_werkeninnoordoostbrabant = scrape_werkeninnoordoostbrabant()
+        dfs.append(df_werkeninnoordoostbrabant)
+        print(f"✅ werkeninnoordoostbrabant done, {len(df_werkeninnoordoostbrabant)} rows")
     except Exception as e:
-        print(f"❌ Fout tijdens scraping werkenvoornederland: {e}")
+        print(f"❌ Fout tijdens scraping werkeninnoordoostbrabant: {e}")
 
-    # # werkeninnoordoostbrabant
-    # try:
-    #     print("➡️ Start scrape: werkeninnoordoostbrabant")
-    #     df_werkeninnoordoostbrabant = scrape_werkeninnoordoostbrabant()
-    #     dfs.append(df_werkeninnoordoostbrabant)
-    #     print(f"✅ werkeninnoordoostbrabant done, {len(df_werkeninnoordoostbrabant)} rows")
-    # except Exception as e:
-    #     print(f"❌ Fout tijdens scraping werkeninnoordoostbrabant: {e}")
-
-    # # werkeninzuidoostbrabant
-    # try:
-    #     print("➡️ Start scrape: werkeninzuidoostbrabant")
-    #     df_werkeninzuidoostbrabant = scrape_werkeninzuidoostbrabant()
-    #     dfs.append(df_werkeninzuidoostbrabant)
-    #     print(f"✅ werkeninzuidoostbrabant done, {len(df_werkeninzuidoostbrabant)} rows")
-    # except Exception as e:
-    #     print(f"❌ Fout tijdens scraping werkeninzuidoostbrabant: {e}")
+    # werkeninzuidoostbrabant
+    try:
+        print("➡️ Start scrape: werkeninzuidoostbrabant")
+        df_werkeninzuidoostbrabant = scrape_werkeninzuidoostbrabant()
+        dfs.append(df_werkeninzuidoostbrabant)
+        print(f"✅ werkeninzuidoostbrabant done, {len(df_werkeninzuidoostbrabant)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping werkeninzuidoostbrabant: {e}")
 
     # # gemeentebanen
     # try:
