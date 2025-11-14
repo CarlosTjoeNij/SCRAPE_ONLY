@@ -63,23 +63,23 @@ def scrape_all_jobs():
     except Exception as e:
         print(f"❌ Fout tijdens scraping Yacht: {e}")
 
-    # # IGOM
-    # try:
-    #     print("➡️ Start scrape: IGOM")
-    #     df_igom = scrape_igom()
-    #     dfs.append(df_igom)
-    #     print(f"✅ IGOM done, {len(df_igom)} rows")
-    # except Exception as e:
-    #     print(f"❌ Fout tijdens scraping IGOM: {e}")
+    # IGOM
+    try:
+        print("➡️ Start scrape: IGOM")
+        df_igom = scrape_igom()
+        dfs.append(df_igom)
+        print(f"✅ IGOM done, {len(df_igom)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping IGOM: {e}")
 
-    # # werkenvoornederland
-    # try:
-    #     print("➡️ Start scrape: werkenvoornederland")
-    #     df_werkenvoornederland = scrape_werkenvoornederland()
-    #     dfs.append(df_werkenvoornederland)
-    #     print(f"✅ werkenvoornederland done, {len(df_werkenvoornederland)} rows")
-    # except Exception as e:
-    #     print(f"❌ Fout tijdens scraping werkenvoornederland: {e}")
+    # werkenvoornederland
+    try:
+        print("➡️ Start scrape: werkenvoornederland")
+        df_werkenvoornederland = scrape_werkenvoornederland()
+        dfs.append(df_werkenvoornederland)
+        print(f"✅ werkenvoornederland done, {len(df_werkenvoornederland)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping werkenvoornederland: {e}")
 
     # # werkeninnoordoostbrabant
     # try:
