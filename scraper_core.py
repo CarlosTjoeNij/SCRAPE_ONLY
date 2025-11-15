@@ -117,23 +117,23 @@ def scrape_all_jobs():
     except Exception as e:
         print(f"❌ Fout tijdens scraping Greenjobs: {e}")
 
-    # # werkeninnoordhollandnoord
-    # try:
-    #     print("➡️ Start scrape: Werkeninnoordhollandnoord")
-    #     df_werkeninnoordhollandnoord = scrape_werkeninnoordhollandnoord()
-    #     dfs.append(df_werkeninnoordhollandnoord)
-    #     print(f"✅ Werkeninnoordhollandnoord done, {len(df_werkeninnoordhollandnoord)} rows")
-    # except Exception as e:
-    #     print(f"❌ Fout tijdens scraping Werkeninnoordhollandnoord: {e}")
+    # werkeninnoordhollandnoord
+    try:
+        print("➡️ Start scrape: Werkeninnoordhollandnoord")
+        df_werkeninnoordhollandnoord = scrape_werkeninnoordhollandnoord()
+        dfs.append(df_werkeninnoordhollandnoord)
+        print(f"✅ Werkeninnoordhollandnoord done, {len(df_werkeninnoordhollandnoord)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping Werkeninnoordhollandnoord: {e}")
 
-    # # werkeninfriesland
-    # try:
-    #     print("➡️ Start scrape: Werkeninfriesland")
-    #     df_werkeninfriesland = scrape_werkeninfriesland()
-    #     dfs.append(df_werkeninfriesland)
-    #     print(f"✅ Werkeninfriesland done, {len(df_werkeninfriesland)} rows")
-    # except Exception as e:
-    #     print(f"❌ Fout tijdens scraping Werkeninfriesland: {e}")    
+    # werkeninfriesland
+    try:
+        print("➡️ Start scrape: Werkeninfriesland")
+        df_werkeninfriesland = scrape_werkeninfriesland()
+        dfs.append(df_werkeninfriesland)
+        print(f"✅ Werkeninfriesland done, {len(df_werkeninfriesland)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping Werkeninfriesland: {e}")    
 
     # # werkenvoorgroningen
     # try:
