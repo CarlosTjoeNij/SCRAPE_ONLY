@@ -99,23 +99,23 @@ def scrape_all_jobs():
     except Exception as e:
         print(f"❌ Fout tijdens scraping werkeninzuidoostbrabant: {e}")
 
-    # # gemeentebanen
-    # try:
-    #     print("➡️ Start scrape: Gemeentebanen")
-    #     df_gemeentebanen = scrape_gemeentebanen()
-    #     dfs.append(df_gemeentebanen)
-    #     print(f"✅ Gemeentebanen done, {len(df_gemeentebanen)} rows")
-    # except Exception as e:
-    #     print(f"❌ Fout tijdens scraping Gemeentebanen: {e}")
+    # gemeentebanen
+    try:
+        print("➡️ Start scrape: Gemeentebanen")
+        df_gemeentebanen = scrape_gemeentebanen()
+        dfs.append(df_gemeentebanen)
+        print(f"✅ Gemeentebanen done, {len(df_gemeentebanen)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping Gemeentebanen: {e}")
         
-    # # greenjobs
-    # try:
-    #     print("➡️ Start scrape: Greenjobs")
-    #     df_greenjobs = scrape_greenjobs()
-    #     dfs.append(df_greenjobs)
-    #     print(f"✅ Greenjobs done, {len(df_greenjobs)} rows")
-    # except Exception as e:
-    #     print(f"❌ Fout tijdens scraping Greenjobs: {e}")
+    # greenjobs
+    try:
+        print("➡️ Start scrape: Greenjobs")
+        df_greenjobs = scrape_greenjobs()
+        dfs.append(df_greenjobs)
+        print(f"✅ Greenjobs done, {len(df_greenjobs)} rows")
+    except Exception as e:
+        print(f"❌ Fout tijdens scraping Greenjobs: {e}")
 
     # # werkeninnoordhollandnoord
     # try:
