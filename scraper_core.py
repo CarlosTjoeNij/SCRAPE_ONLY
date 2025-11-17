@@ -36,41 +36,41 @@ def scrape_all_jobs():
     start_time = time.time()
     dfs = []
 
-    # Striive
-    try:
-        print("➡️ Start scrape: Striive")
-        df_striive = scrape_striive()
-        dfs.append(df_striive)
-        print(f"✅ Striive done, {len(df_striive)} rows")
-    except Exception as e:
-        print(f"❌ Fout tijdens scraping Striive: {e}")
+    # # Striive
+    # try:
+    #     print("➡️ Start scrape: Striive")
+    #     df_striive = scrape_striive()
+    #     dfs.append(df_striive)
+    #     print(f"✅ Striive done, {len(df_striive)} rows")
+    # except Exception as e:
+    #     print(f"❌ Fout tijdens scraping Striive: {e}")
 
-    # Flextender
-    try:
-        print("➡️ Start scrape: Flextender")
-        df_flex = scrape_flextender()
-        dfs.append(df_flex)
-        print(f"✅ Flextender done, {len(df_flex)} rows")
-    except Exception as e:
-        print(f"❌ Fout tijdens scraping Flextender: {e}")
+    # # Flextender
+    # try:
+    #     print("➡️ Start scrape: Flextender")
+    #     df_flex = scrape_flextender()
+    #     dfs.append(df_flex)
+    #     print(f"✅ Flextender done, {len(df_flex)} rows")
+    # except Exception as e:
+    #     print(f"❌ Fout tijdens scraping Flextender: {e}")
 
-    # Yacht
-    try:
-        print("➡️ Start scrape: Yacht")
-        df_yacht = scrape_yacht()
-        dfs.append(df_yacht)
-        print(f"✅ Yacht done, {len(df_yacht)} rows")
-    except Exception as e:
-        print(f"❌ Fout tijdens scraping Yacht: {e}")
+    # # Yacht
+    # try:
+    #     print("➡️ Start scrape: Yacht")
+    #     df_yacht = scrape_yacht()
+    #     dfs.append(df_yacht)
+    #     print(f"✅ Yacht done, {len(df_yacht)} rows")
+    # except Exception as e:
+    #     print(f"❌ Fout tijdens scraping Yacht: {e}")
 
-    # IGOM
-    try:
-        print("➡️ Start scrape: IGOM")
-        df_igom = scrape_igom()
-        dfs.append(df_igom)
-        print(f"✅ IGOM done, {len(df_igom)} rows")
-    except Exception as e:
-        print(f"❌ Fout tijdens scraping IGOM: {e}")
+    # # IGOM
+    # try:
+    #     print("➡️ Start scrape: IGOM")
+    #     df_igom = scrape_igom()
+    #     dfs.append(df_igom)
+    #     print(f"✅ IGOM done, {len(df_igom)} rows")
+    # except Exception as e:
+    #     print(f"❌ Fout tijdens scraping IGOM: {e}")
 
     # werkenvoornederland
     try:
@@ -81,14 +81,14 @@ def scrape_all_jobs():
     except Exception as e:
         print(f"❌ Fout tijdens scraping werkenvoornederland: {e}")
 
-    # werkeninnoordoostbrabant
-    try:
-        print("➡️ Start scrape: werkeninnoordoostbrabant")
-        df_werkeninnoordoostbrabant = scrape_werkeninnoordoostbrabant()
-        dfs.append(df_werkeninnoordoostbrabant)
-        print(f"✅ werkeninnoordoostbrabant done, {len(df_werkeninnoordoostbrabant)} rows")
-    except Exception as e:
-        print(f"❌ Fout tijdens scraping werkeninnoordoostbrabant: {e}")
+    # # werkeninnoordoostbrabant
+    # try:
+    #     print("➡️ Start scrape: werkeninnoordoostbrabant")
+    #     df_werkeninnoordoostbrabant = scrape_werkeninnoordoostbrabant()
+    #     dfs.append(df_werkeninnoordoostbrabant)
+    #     print(f"✅ werkeninnoordoostbrabant done, {len(df_werkeninnoordoostbrabant)} rows")
+    # except Exception as e:
+    #     print(f"❌ Fout tijdens scraping werkeninnoordoostbrabant: {e}")
 
     # # werkeninzuidoostbrabant
     # try:
