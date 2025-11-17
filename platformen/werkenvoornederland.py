@@ -25,112 +25,109 @@ def get_chrome_driver(timeout=15):
     return driver
 
 def scrape_werkenvoornederland(with_description=True, max_scrolls=30):
-    def fetch_vacature_description(link, title):
-        """Haalt de beschrijving van de detailpagina (snel via requests)."""
+    import requests
+    from bs4 import BeautifulSoup
+    from selenium.common.exceptions import NoSuchElementException
+    import pandas as pd
+    import time
+
+    # ------------------------------------------------------
+    # Snelle HTML scraper voor detailpagina (email + tekst)
+    # ------------------------------------------------------
+    def fetch_detail_data(link, title):
         try:
-            resp = requests.get(link, timeout=(5, 10))
+            resp = requests.get(link, timeout=(5, 15))
             resp.raise_for_status()
             soup = BeautifulSoup(resp.text, "html.parser")
 
-            sections = soup.select("div.width-100")
-            text_parts = []
-            for sec in sections:
-                heading = sec.select_one("h2")
-                content = sec.select_one("div.s-article-content")
-                if heading and content and heading.text.strip() in [
-                    "Dit ga je doen",
-                    "Dit vragen wij",
-                    "Hier kom je te werken",
-                ]:
-                    text_parts.append(f"### {heading.text.strip()}\n{content.text.strip()}")
-            return "\n\n".join(text_parts)
+            # Email
+            email = ""
+            email_el = soup.select_one("a[href^='mailto:']")
+            if email_el:
+                email = email_el.text.strip()
+
+            # Beschrijving
+            beschrijving = ""
+            if with_description:
+                sections = soup.select("div.s-article-content")
+                beschrijving = "\n\n".join([s.get_text(strip=True) for s in sections])
+
+            return email, beschrijving
+
         except Exception as e:
-            print(f"⚠️ Beschrijving mislukt ({title}): {e}")
-            return ""
+            print(f"⚠️ Detailpagina mislukt ({title}): {e}")
+            return "", ""
 
-    def start_driver():
-        driver = get_chrome_driver()
-        driver.set_page_load_timeout(30)
-        driver.get(
-            "https://www.werkenvoornederland.nl/vacatures?"
-            "type=vacature&werkdenkniveau=CWD.04%2CCWD.08&"
-            "vakgebied=CVG.02%2CCVG.32%2CCVG.08"
-        )
-        time.sleep(3)
-        return driver
+    # ------------------------------------------------------
+    # Start driver en laad lijstpagina
+    # ------------------------------------------------------
+    driver = get_chrome_driver()
+    driver.set_page_load_timeout(20)
 
-    def scroll_page(driver):
-        last_count = 0
-        for _ in range(max_scrolls):
-            vacatures = driver.find_elements(By.CSS_SELECTOR, "div.vacancy-list__item section.vacancy")
-            if len(vacatures) == last_count:
-                break
-            last_count = len(vacatures)
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(2)
-        return driver.find_elements(By.CSS_SELECTOR, "div.vacancy-list__item section.vacancy")
+    driver.get(
+        "https://www.werkenvoornederland.nl/vacatures?"
+        "type=vacature&werkdenkniveau=CWD.04%2CCWD.08&"
+        "vakgebied=CVG.02%2CCVG.32%2CCVG.08"
+    )
+    time.sleep(2)
 
-    driver = start_driver()
-    vacatures = scroll_page(driver)
+    # ------------------------------------------------------
+    # Scroll tot alles geladen is
+    # ------------------------------------------------------
+    last_count = 0
+    for _ in range(max_scrolls):
+        vacatures = driver.find_elements(By.CSS_SELECTOR, "div.vacancy-list__item section.vacancy")
 
-    wait = WebDriverWait(driver, 6)
+        if len(vacatures) == last_count:
+            break  # niets nieuws → stoppen
+
+        last_count = len(vacatures)
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(1.5)
+
+    vacatures = driver.find_elements(By.CSS_SELECTOR, "div.vacancy-list__item section.vacancy")
+    print(f"➡️ gevonden vacatures: {len(vacatures)}")
+
+    # ------------------------------------------------------
+    # Parse alle kaarten
+    # ------------------------------------------------------
     data = []
     seen_links = set()
 
     for idx, vac in enumerate(vacatures):
         try:
+            # Titel + Link
             title_el = vac.find_element(By.CSS_SELECTOR, "h2.vacancy__title a")
             title = title_el.text.strip()
             link = title_el.get_attribute("href")
             if not link.startswith("http"):
                 link = "https://www.werkenvoornederland.nl" + link
+
             if link in seen_links:
                 continue
             seen_links.add(link)
 
             # Plaats
             try:
-                plaats = vac.find_element(By.CSS_SELECTOR, "li.job-short-info__item-icon span.job-short-info__value-icon").text.strip()
+                plaats = vac.find_element(By.CSS_SELECTOR,
+                    "li.job-short-info__item-icon span.job-short-info__value-icon"
+                ).text.strip()
             except NoSuchElementException:
                 plaats = ""
 
             # Opdrachtgever
             try:
                 opdrachtgever = vac.find_element(By.CSS_SELECTOR, "p.vacancy__employer").text.strip()
-            except NoSuchElementException:
+            except:
                 opdrachtgever = ""
 
-            # Beschrijving via requests
-            beschrijving = fetch_vacature_description(link, title) if with_description else ""
-
-            # --- Email via Selenium ---
-            email = ""
-            try:
-                # Open vacaturepagina
-                driver.execute_script("window.open(arguments[0]);", link)
-                driver.switch_to.window(driver.window_handles[-1])
-                time.sleep(2)
-
-                # Wachten tot e-mail zichtbaar (max 5 sec)
-                email_el = wait.until(
-                    EC.presence_of_element_located(
-                        (By.CSS_SELECTOR, "span.job-contact-person__email a[href^='mailto:']")
-                    )
-                )
-                email = email_el.text.strip()
-
-            except TimeoutException:
-                email = ""
-            except Exception as e:
-                print(f"⚠️ Geen email gevonden bij {title}: {e}")
-            finally:
-                driver.close()
-                driver.switch_to.window(driver.window_handles[0])
+            # ---- SNEL detail ophalen via requests ----
+            email, beschrijving = fetch_detail_data(link, title)
 
             data.append({
                 "Titel": title,
                 "Plaats": plaats,
-                "Regio": plaats,  # later mappen
+                "Regio": plaats,  # later gemapt
                 "Opdrachtgever": opdrachtgever,
                 "Email": email,
                 "Link": link,
@@ -143,9 +140,12 @@ def scrape_werkenvoornederland(with_description=True, max_scrolls=30):
             continue
 
     driver.quit()
+
     df = pd.DataFrame(data)
 
+    # ------------------------------------------------------
     # Mapping Plaats → Provincie
+    # ------------------------------------------------------
     woonplaatsen_df = pd.read_csv("woonplaatsen.csv")
     plaats_to_provincie = dict(zip(
         woonplaatsen_df['Plaats'].str.lower().str.strip(),
