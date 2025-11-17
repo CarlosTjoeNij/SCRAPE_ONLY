@@ -26,93 +26,100 @@ def get_chrome_driver(timeout=15):
 
 def scrape_werkeninnoordoostbrabant(with_description=True):
     driver = get_chrome_driver()
-    driver.set_page_load_timeout(30)
+    driver.set_page_load_timeout(10)
+
     driver.get("https://www.werkeninnoordoostbrabant.nl/vacatures?opleidingsniveau=hbo,wo")
-    time.sleep(5)
 
     data = []
     page = 1
 
     while True:
+        # ---- Sneller ophalen van vacaturekaarten ----
         try:
-            # Wacht tot vacatures zichtbaar zijn
-            WebDriverWait(driver, 10).until(
+            vacatures = WebDriverWait(driver, 5).until(
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, "app-vacature-item"))
             )
-            vacatures = driver.find_elements(By.CSS_SELECTOR, "app-vacature-item")
         except TimeoutException:
-            print(f"⚠️ Geen vacatures gevonden op pagina {page}.")
+            print(f"⚠️ Geen vacatures op pagina {page}. Stoppen.")
             break
 
         for idx in range(len(vacatures)):
             try:
-                # Haal lijst opnieuw op om stale element te vermijden
+                # Haal items opnieuw op (stale element fix)
                 vacatures = driver.find_elements(By.CSS_SELECTOR, "app-vacature-item")
                 vac = vacatures[idx]
 
-                # Titel
-                titel = vac.find_element(By.CSS_SELECTOR, "h3.kaart__titel").text.strip()
+                title = vac.find_element(By.CSS_SELECTOR, "h3.kaart__titel").text.strip()
 
-                # Klik op vacature
-                driver.execute_script("arguments[0].scrollIntoView(true);", vac)
-                try:
-                    vac.click()
-                except ElementClickInterceptedException:
-                    driver.execute_script("arguments[0].click();", vac)
-                time.sleep(2)
+                # ---- Sneller klikken ----
+                clicked = False
+                for _ in range(2):  # max 2 pogingen
+                    try:
+                        vac.click()
+                        clicked = True
+                        break
+                    except:
+                        driver.execute_script("arguments[0].click();", vac)
 
-                # Beschrijving
-                beschrijving = ""
+                if not clicked:
+                    print(f"⚠️ Skip vacature {idx+1}: niet klikbaar")
+                    continue
+
+                # ---- Beschrijving laden (max 5 sec wachten) ----
+                description = ""
                 if with_description:
                     try:
-                        content_el = WebDriverWait(driver, 5).until(
+                        elem = WebDriverWait(driver, 5).until(
                             EC.presence_of_element_located((By.CSS_SELECTOR, "div.cb-text-container.prose"))
                         )
-                        beschrijving = content_el.get_attribute("innerText").strip()
+                        description = elem.text.strip()
                     except:
-                        beschrijving = ""
+                        description = ""
 
-                # Link = huidige URL
                 link = driver.current_url
 
                 data.append({
-                    "Titel": titel,
+                    "Titel": title,
                     "Regio": "Noord-Brabant",
                     "Link": link,
-                    "Beschrijving": beschrijving,
+                    "Beschrijving": description,
                     "Bron": "Werkeninnoordoostbrabant"
                 })
 
-                # Terug naar overzicht
-                driver.back()
-                time.sleep(3)
+                # ---- Snelle terugnavigatie ----
+                try:
+                    driver.back()
+                    WebDriverWait(driver, 3).until(
+                        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "app-vacature-item"))
+                    )
+                except:
+                    print("⚠️ Back mislukte → pagina opnieuw laden")
+                    driver.get(driver.current_url)
 
-            except StaleElementReferenceException:
-                print(f"⚠️ Stale element bij vacature {idx+1} op pagina {page}, opnieuw proberen...")
-                time.sleep(2)
-                continue
             except Exception as e:
                 print(f"⚠️ Fout bij vacature {idx+1} op pagina {page}: {e}")
-                driver.back()
-                time.sleep(2)
+                # NIET TOO LANG WACHTEN → gewoon skippen
                 continue
 
-        # Volgende pagina
+        # ---- Volgende pagina ----
         try:
             next_btn = driver.find_element(By.CSS_SELECTOR, "button.mat-mdc-paginator-navigation-next")
-            # Controleer aria-disabled attribuut in plaats van alleen class
+
+            # Check disabled
             if next_btn.get_attribute("aria-disabled") == "true":
-                #print(f"✅ Laatste pagina {page} bereikt.")
                 break
-            # Scroll en klik
-            driver.execute_script("arguments[0].scrollIntoView(true);", next_btn)
+
             driver.execute_script("arguments[0].click();", next_btn)
             page += 1
-            time.sleep(5)  # wacht tot de nieuwe pagina geladen is
+
+            # Wachten tot pagina geladen is
+            WebDriverWait(driver, 5).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "app-vacature-item"))
+            )
+
         except Exception as e:
-            print(f"⚠️ Kan volgende pagina niet vinden of klikken: {e}")
+            print(f"⚠️ Kan volgende pagina niet vinden/klikken: {e}")
             break
 
     driver.quit()
-    df = pd.DataFrame(data)
-    return df
+    return pd.DataFrame(data)
