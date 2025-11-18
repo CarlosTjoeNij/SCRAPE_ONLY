@@ -9,7 +9,7 @@ BUCKET_NAME = "scrapes_cvmatcher"
 
 def upload_to_gcs(df: pd.DataFrame):
     """Upload DataFrame naar GCS als Parquet-bestand."""
-    today_str = datetime.date.today().strftime("%d%m%Y")
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
     filename = f"jobs_{today_str}.parquet"
 
     client = storage.Client()
