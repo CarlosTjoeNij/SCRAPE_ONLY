@@ -32,10 +32,6 @@ from platformen.vacaturesnoordholland import scrape_vacaturesnoordholland
 from platformen.werkenbijnod import scrape_werkenbijnod
 
 def run_with_timeout(func, timeout_seconds):
-    """
-    Runs a scraper function with a timeout.
-    If it takes too long, return None.
-    """
     result = {}
 
     def wrapper():
@@ -52,8 +48,8 @@ def run_with_timeout(func, timeout_seconds):
         return "timeout"
     if "error" in result:
         return result["error"]
-    return result.get("data", None)
 
+    return result.get("data")
 
 def scrape_all_jobs():
     start_time = time.time()
@@ -81,24 +77,24 @@ def scrape_all_jobs():
         ("Werkenbijnod", scrape_werkenbijnod),
     ]
 
+    TIMEOUT_SECONDS = 2400   # ⏱ 10 minuten per scraper
+
     for name, func in SCRAPERS:
         print(f"➡️ Start scrape: {name}")
 
-        out = run_with_timeout(func, 60)  # timeout 60 sec → pas aan naar wens
+        out = run_with_timeout(func, TIMEOUT_SECONDS)
 
         if out == "timeout":
-            print(f"⏭️ {name} overgeslagen (timeout)")
+            print(f"⏭️ {name} overgeslagen (timeout van {TIMEOUT_SECONDS} sec)")
         elif isinstance(out, Exception):
             print(f"❌ Fout tijdens scraping {name}: {out}")
         else:
             dfs.append(out)
             print(f"✅ {name} done, {len(out)} rows")
 
-    if dfs:
-        df_combined = pd.concat(dfs, ignore_index=True)
-    else:
-        df_combined = pd.DataFrame()
+    # Combine
+    df_combined = pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
 
     duration = time.time() - start_time
-    print(f"⏱️ Scraping voltooid in {duration/60:.1f} minuten")
+    print(f"⏱️ Scraping afgerond in {duration/60:.1f} minuten")
     return df_combined
