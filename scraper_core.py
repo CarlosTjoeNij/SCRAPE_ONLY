@@ -77,24 +77,33 @@ def scrape_all_jobs():
         ("Werkenbijnod", scrape_werkenbijnod),
     ]
 
-    TIMEOUT_SECONDS = 2400   # ⏱ 10 minuten per scraper
+    TIMEOUT_SECONDS = 600  # 10 minuten per site
 
     for name, func in SCRAPERS:
         print(f"➡️ Start scrape: {name}")
 
         out = run_with_timeout(func, TIMEOUT_SECONDS)
 
-        if out == "timeout":
+        # --- FIX: no ambiguity ----
+        if isinstance(out, str) and out == "timeout":
             print(f"⏭️ {name} overgeslagen (timeout van {TIMEOUT_SECONDS} sec)")
-        elif isinstance(out, Exception):
+            continue
+
+        if isinstance(out, Exception):
             print(f"❌ Fout tijdens scraping {name}: {out}")
-        else:
+            continue
+
+        if isinstance(out, pd.DataFrame):
             dfs.append(out)
             print(f"✅ {name} done, {len(out)} rows")
+            continue
 
-    # Combine
+        print(f"⚠️ {name}: onverwacht resultaat type: {type(out)} -> {out}")
+
+    # Combine to final DF
     df_combined = pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
 
     duration = time.time() - start_time
     print(f"⏱️ Scraping afgerond in {duration/60:.1f} minuten")
+
     return df_combined
