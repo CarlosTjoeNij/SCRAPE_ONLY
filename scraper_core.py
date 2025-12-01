@@ -77,7 +77,7 @@ def scrape_all_jobs():
         ("Werkenbijnod", scrape_werkenbijnod),
     ]
 
-    TIMEOUT_SECONDS = 600  # 10 minuten per site
+    TIMEOUT_SECONDS = 2600  # 10 minuten per site
 
     for name, func in SCRAPERS:
         print(f"➡️ Start scrape: {name}")
